@@ -3,7 +3,7 @@ package science.rafael.test;
 import java.util.ArrayList;
 import java.util.List;
 
-import science.rafael.GoogleResults;
+import science.rafael.trends.GoogleResults;
 
 /**
  * Google Search Client
