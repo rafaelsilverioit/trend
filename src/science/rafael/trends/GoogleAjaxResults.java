@@ -9,9 +9,9 @@ import java.util.List;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
-import science.rafael.trends.ResponseHandler.Result;
-
 import com.google.gson.Gson;
+
+import science.rafael.trends.ResponseHandler.Result;
 
 /**
  * Google Search Client - Ajax version
