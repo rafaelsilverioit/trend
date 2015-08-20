@@ -1,4 +1,4 @@
-package science.rafael;
+package science.rafael.trends;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
