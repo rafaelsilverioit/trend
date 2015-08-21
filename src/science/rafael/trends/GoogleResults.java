@@ -79,6 +79,7 @@ public class GoogleResults {
 		// set parameters
 		String key = confs.getProperty("key");
 		String cx = confs.getProperty("cx");
+		String charset = confs.getProperty("charset");
 
 		for (String keyword : keywords) {
 			// cleans keyword
@@ -104,7 +105,7 @@ public class GoogleResults {
 
 			try {
 				// format
-				json = EntityUtils.toString(result.getEntity(), "UTF-8");
+				json = EntityUtils.toString(result.getEntity(), charset);
 			} catch (ParseException | IOException e) {
 				e.printStackTrace();
 			}
@@ -169,6 +170,7 @@ public class GoogleResults {
 
 		String key = confs.getProperty("key");
 		String cx = confs.getProperty("cx");
+		String charset = confs.getProperty("charset");
 
 		try {
 			url = new URI("https://www.googleapis.com/customsearch/v1?key="
@@ -190,7 +192,7 @@ public class GoogleResults {
 		String json = null;
 
 		try {
-			json = EntityUtils.toString(result.getEntity(), "UTF-8");
+			json = EntityUtils.toString(result.getEntity(), charset);
 		} catch (ParseException | IOException e) {
 			e.printStackTrace();
 		}
