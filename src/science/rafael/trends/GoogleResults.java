@@ -23,16 +23,31 @@ import science.rafael.utils.PropertyManager;
 /**
  * Google Search Client
  * 
+ * Google Custom Search method
+ * 
+ * Limit: 100 requests/day (FREE VERSION!!)
+ * 
  * @author Rafael Silvério Amaral
- * @email  contato@rafael.science
+ * @email contato@rafael.science
  */
 public class GoogleResults {
+	// stores trend words
 	private static JSONArray trends;
 	private static JSONArray resultTrends;
 	private static JSONArray singleTrends;
+
+	// configuration properties
 	private static Properties confs;
-	private URI url = null;
-	
+
+	// prepare urls
+	private static URI url;
+
+	// handles response
+	private static HttpResponse result;
+
+	// used to parse json response
+	private static String json;
+
 	public GoogleResults() {
 
 	}
@@ -46,45 +61,49 @@ public class GoogleResults {
 	 */
 	@SuppressWarnings("unchecked")
 	public JSONArray getTrendResults(List<String> keywords) throws Exception {
+		// disable SSL verification, because (don't know why) googleapis
+		// certificate is not listed by org.apache 4, but will be in next
+		// release
 		CloseableHttpClient httpClient = HttpClients.custom()
 				.setSSLHostnameVerifier(new NoopHostnameVerifier()).build();
 
+		trends = new JSONArray();
+
 		try {
+			// loads configurations
 			confs = PropertyManager.readProperties("search.properties");
 		} catch (FileNotFoundException nf) {
 			nf.printStackTrace();
 		}
 
+		// set parameters
 		String key = confs.getProperty("key");
 		String cx = confs.getProperty("cx");
 
-		trends = new JSONArray();
-		
 		for (String keyword : keywords) {
-			URI url = null;
-
-			String word = keyword.contains(" ") ? 
-					keyword.toLowerCase().replace(" ", "+") : 
-					keyword;
+			// cleans keyword
+			String word = keyword.contains(" ") ? keyword.toLowerCase()
+					.replace(" ", "+") : keyword;
 			try {
+				// prepares url
 				url = new URI("https://www.googleapis.com/customsearch/v1?key="
 						+ key + "&cx=" + cx + "&q=" + word + "&alt=json");
 			} catch (Exception ex) {
 				ex.printStackTrace();
 			}
 
+			// creates get request
 			HttpGet get = new HttpGet(url);
-			HttpResponse result = null;
 
 			try {
+				// do the request and receives the response
 				result = httpClient.execute(get);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 
-			String json = null;
-
 			try {
+				// format
 				json = EntityUtils.toString(result.getEntity(), "UTF-8");
 			} catch (ParseException | IOException e) {
 				e.printStackTrace();
@@ -94,14 +113,20 @@ public class GoogleResults {
 
 			try {
 				JSONParser parser = new JSONParser();
+				// parse json
 				Object resultObject = parser.parse(json);
 
+				// creates JSONObject from Object
 				JSONObject obj = (JSONObject) resultObject;
+
+				// select and creates JSONArray from "items"
 				JSONArray jA = (JSONArray) obj.get("items");
 
 				for (Object ob : jA) {
 					JSONObject jObj = (JSONObject) ob;
 
+					// creates JSONObject with a single result,
+					// then adds to resultTrends
 					JSONObject results = new JSONObject();
 
 					results.put("title", jObj.get("title"));
@@ -110,10 +135,12 @@ public class GoogleResults {
 
 					resultTrends.add(results);
 				}
-				
+
+				// associates above results with the specific keyword
 				JSONObject resTrend = new JSONObject();
 				resTrend.put(keyword, resultTrends);
 
+				// then adds to a JSONArray
 				trends.add(resTrend);
 			} catch (Exception ex) {
 				ex.printStackTrace();
@@ -145,7 +172,8 @@ public class GoogleResults {
 
 		try {
 			url = new URI("https://www.googleapis.com/customsearch/v1?key="
-					+ key + "&cx=" + cx + "&q=" + keyword.replace(" ", "+") + "&alt=json");
+					+ key + "&cx=" + cx + "&q=" + keyword.replace(" ", "+")
+					+ "&alt=json");
 		} catch (URISyntaxException e) {
 			e.printStackTrace();
 		}
